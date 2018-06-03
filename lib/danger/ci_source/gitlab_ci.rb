@@ -26,7 +26,9 @@ module Danger
         "GITLAB_CI", "CI_PROJECT_ID"
       ].all? { |x| env[x] }
 
-      exists && determine_merge_request_id(env).to_i > 0
+      mr_id = determine_merge_request_id(env)
+      puts "====> exists = #{exists} / mr_id=#{mr_id}"
+      exists && mr_id.to_i > 0
     end
 
     def self.determine_merge_request_id(env)
@@ -38,6 +40,7 @@ module Danger
       client = RequestSources::GitLab.new(nil, env).client
 
       merge_requests = client.merge_requests(project_id, state: :opened)
+      puts "====> merge_requests #{merge_requests}"
       merge_request = merge_requests.auto_paginate.find do |mr|
         mr.sha == base_commit
       end
